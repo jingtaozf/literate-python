@@ -23,6 +23,14 @@ PreToolUse hook exists to catch:
 The Emacs tooling produces the correct shape automatically. Reach for it
 instead of hand-writing.
 
+**Always — regardless of file size.** There is no "small enough to
+hand-paste" threshold. A 10-line file goes through `literate-org-import`
+(or `literate-org-resplit-buffer` for the repair path) exactly like a
+1000-line one. The size-based shortcut ("single-block import for small
+files") is forbidden everywhere, including the `lp-resync` new-file
+triage: always use the tool, never hand-author, never paste a whole file
+into one block.
+
 ## Triggers
 
 - "import `<file>` into `<x>.org`" / "onboard `<file>` into LP"
