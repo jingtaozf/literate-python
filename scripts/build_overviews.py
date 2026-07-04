@@ -426,6 +426,40 @@ exists for tooling that doesn't speak Org.
 - [[file:lp/decisions-log.org][lp/decisions-log.org]] — accepted / rejected design proposals +
   research notes (if used).
 
+* Scoping LP to a registered subset
+
+By default every matching-extension source file under
+=LITERATE_AGENT_TANGLED_ROOTS= is LP-managed: edits are blocked (edit
+the owning .org instead) and the file is tangled from that .org. In a
+repo where teammates also work directly on the submodules, managing
+*all* source prose-first is too heavy. Narrow =TANGLED_ROOTS= so it
+names only the folders — or exact files — you want under LP. That list
+*is* the registry.
+
+Two questions, two predicates:
+
+- *May the agent edit this source?* — blocked if the path is under
+  =TANGLED_ROOTS= *or* is a known tangle target in
+  =.cache/tangle-map.tsv= (the reverse-map backstop).
+- *May a tangle write to this output?* — allowed only if the path is
+  under =TANGLED_ROOTS=. Net-A-only on purpose: the reverse-map is
+  derived from the .org's own =:tangle= lines, so testing an output
+  against it would be circular.
+
+The tangle gate is the clobber guard. Before an auto-tangle
+(=LP_AUTO_TANGLE=1=), =hooks/check-tangle-scope.py= refuses any .org
+whose =:tangle= output escapes the registry — otherwise the tangle
+would overwrite a file the team edits directly. Invariant: every kept
+.org tangles only into registered zones. Empty =TANGLED_ROOTS= means
+the whole repo is the zone (single-repo default) and the gate is a
+no-op.
+
+#+begin_src bash
+# .claude/hooks/_env.sh — TANGLED_ROOTS entries are folder prefixes and/or
+# exact file paths; only these are edit-blocked AND tangle-writable.
+export LITERATE_AGENT_TANGLED_ROOTS="repos/mega-code/,repos/pi/pi/config.py"
+#+end_src
+
 * Build + lint commands
 
 These targets are provided by ``templates/Makefile.lp.mk`` from

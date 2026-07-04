@@ -21,6 +21,7 @@ machinery; the shebang forces python3, so the suffix is cosmetic.
 from __future__ import annotations
 
 import os
+import re
 import subprocess
 import sys
 from pathlib import Path
@@ -284,7 +285,10 @@ def resolve_tangled_path(
     """
     base = project_root if project_root is not None else REPO_ROOT
     try:
-        return str(Path(file_path).resolve().relative_to(base))
+        # Resolve BOTH sides: on macOS a symlinked base (e.g. /var → /private/var
+        # for temp dirs, or a symlinked project root) makes ``relative_to`` fail
+        # unless the base is canonicalised the same way as the resolved target.
+        return str(Path(file_path).resolve().relative_to(Path(base).resolve()))
     except (ValueError, OSError):
         return None
 
@@ -405,6 +409,92 @@ def is_in_block_scope_anywhere(file_path: str) -> tuple[bool, Path | None, dict[
         return blocked, owning, env
     # Fallback: original CLAUDE_PROJECT_DIR-based scope.
     return is_in_block_scope(file_path), None, {}
+
+
+# ── tangle-output gate ───────────────────────────────────────────────────────
+#
+# The block hooks answer "may the agent EDIT this source path?" (no — it's
+# LP-owned, edit the owning .org).  The PostToolUse tangle hook needs the dual
+# question: "may a tangle WRITE to this output path?"  The safe predicate is
+# *registered-zone membership* — a tangle may only write where
+# LITERATE_AGENT_TANGLED_ROOTS declares LP owns the tree.
+#
+# This is deliberately net-A-only (``_under_tangled_root``), NOT the edit
+# block's net-A-∨-net-B.  The reverse-map (net B) is derived FROM .org
+# ``:tangle`` declarations, so testing an output against it is circular —
+# every declared output is trivially in the map.  Testing against the
+# *declared registry* (TANGLED_ROOTS) instead makes the gate catch exactly the
+# dangerous case: a kept-or-stray .org tangling into a de-registered tree the
+# team now edits directly, which a tangle would clobber.  Empty TANGLED_ROOTS
+# (single-repo default) → the whole repo is the zone → the gate is a no-op,
+# preserving legacy behaviour.
+
+_TANGLE_RE = re.compile(r":tangle\s+([^\s:]+)")
+
+
+def tangle_output_allowed(
+    file_path: str,
+    *,
+    project_root: Path | None = None,
+    env: dict[str, str] | None = None,
+) -> bool:
+    """True iff a tangle may write to ``file_path`` — i.e. it lives in a
+    registered LP zone (LITERATE_AGENT_TANGLED_ROOTS).  Non-circular: does not
+    consult the reverse-map.  When TANGLED_ROOTS is empty the whole repo is the
+    zone, so this returns True for every in-project path (legacy behaviour)."""
+    _exts, tangled_roots, _lp, _wl = (
+        _scoped_globals(env or {})
+        if env is not None
+        else (BLOCK_EXTS, TANGLED_ROOTS, LP_ROOT_REL, WHITELIST_FRAGMENTS)
+    )
+    rel = resolve_tangled_path(file_path, project_root=project_root)
+    if rel is None:
+        return False
+    return _under_tangled_root(rel, tangled_roots=tangled_roots)
+
+
+def org_tangle_targets(org_path: Path) -> set[Path]:
+    """Resolved absolute output paths a literate .org declares via ``:tangle``.
+
+    Mirrors ``scripts/build_tangle_map.py``'s extractor, kept local so the hook
+    has no cross-dir import dependency.  Skips ``:tangle no/yes/""`` and
+    template placeholders containing shell / glob metachars (they appear inside
+    prose examples, not real targets)."""
+    base = org_path.parent
+    out: set[Path] = set()
+    try:
+        text = org_path.read_text()
+    except OSError:
+        return out
+    for m in _TANGLE_RE.finditer(text):
+        token = m.group(1)
+        if token in ("no", "yes", '""'):
+            continue
+        if any(c in token for c in "<>{}*?$"):
+            continue
+        out.add((base / token).resolve())
+    return out
+
+
+def unregistered_tangle_outputs(
+    org_path: Path,
+    *,
+    project_root: Path | None = None,
+    env: dict[str, str] | None = None,
+) -> list[str]:
+    """Project-rel output paths this .org would tangle to that fall OUTSIDE the
+    registered LP zone.  Empty list ⇒ every output is registered ⇒ tangling is
+    safe.  A non-empty list ⇒ tangling would write outside TANGLED_ROOTS and
+    risks clobbering team-owned source; the caller should refuse the tangle."""
+    base = project_root if project_root is not None else REPO_ROOT
+    bad: list[str] = []
+    for target in sorted(org_tangle_targets(org_path)):
+        if not tangle_output_allowed(
+            str(target), project_root=project_root, env=env
+        ):
+            rel = resolve_tangled_path(str(target), project_root=base)
+            bad.append(rel if rel is not None else str(target))
+    return bad
 
 
 # ── best-guess fallback (when cache has no exact match) ─────────────────────

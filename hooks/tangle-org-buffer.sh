@@ -39,6 +39,15 @@ cd "$CLAUDE_PROJECT_DIR"
 # ── Tangle (gated by LP_AUTO_TANGLE) ───────────────────────────────────
 [ "${LP_AUTO_TANGLE:-0}" = "1" ] || exit 0
 
+# ── Registration gate: never tangle into a de-registered (team-owned) tree ──
+# If this .org declares any :tangle output outside LITERATE_AGENT_TANGLED_ROOTS,
+# refuse — a tangle there would clobber source the team edits directly.
+# check-tangle-scope.py prints the offenders + remediation to stderr.
+HOOK_DIR="$(cd "$(dirname "$0")" && pwd)"
+if ! python3 "$HOOK_DIR/check-tangle-scope.py" "$file_path" >&2; then
+  exit 2
+fi
+
 # Try host Emacs first.
 if emacsclient -e "(literate-org-tangle-by-path \"$file_path\")" >/dev/null 2>&1; then
   echo "✓ tangled $file_path (via host Emacs)"
