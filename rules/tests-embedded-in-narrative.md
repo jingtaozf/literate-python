@@ -1,3 +1,7 @@
+---
+paths:
+  - "**/*.org"
+---
 # Tests Embedded in Narrative (Crafting Interpreters Style)
 
 > *Last-validated*: 2026-05-15

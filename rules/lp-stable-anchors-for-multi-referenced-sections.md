@@ -1,3 +1,7 @@
+---
+paths:
+  - "**/*.org"
+---
 # Sections referenced ≥ 2 times get a stable :CUSTOM_ID:
 
 > *Last-validated*: 2026-05-19

@@ -1,3 +1,7 @@
+---
+paths:
+  - "**/*.py"
+---
 # Factory-Only Construction for Backends
 
 > *Last-validated*: 2026-05-15

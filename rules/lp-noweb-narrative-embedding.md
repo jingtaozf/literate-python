@@ -1,3 +1,7 @@
+---
+paths:
+  - "**/*.org"
+---
 # LP Noweb — Embedding Code into Algorithm Narrative
 
 > *Last-validated*: 2026-05-19

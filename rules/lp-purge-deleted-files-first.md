@@ -1,3 +1,7 @@
+---
+paths:
+  - "**/*.org"
+---
 # Purge .org Sections for Upstream-Deleted Files BEFORE Re-Tangling
 
 > *Last-validated*: 2026-05-15

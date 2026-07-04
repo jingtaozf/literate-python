@@ -279,3 +279,11 @@ aggregator. For example:
 @~/projects/literate-agent/rules/literate-programming-document-first.md
 @~/projects/literate-agent/rules/lp-prose-no-self-narration.md
 ```
+
+### Path-scoped rules (future: on-demand loading)
+
+Several rules have `paths:` frontmatter (`**/*.py`, `**/*.org`,
+`**/*.el`). Currently they load unconditionally via the `@import`
+chain because `--plugin-dir` does not support `rules/` directories
+(skills, hooks, agents, and MCP only). If Claude Code adds plugin
+rule support, these frontmatter values will enable on-demand loading.

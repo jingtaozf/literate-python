@@ -1,3 +1,7 @@
+---
+paths:
+  - "**/*.org"
+---
 # LP Resync Noweb Discipline
 
 > *Last-validated*: 2026-05-23

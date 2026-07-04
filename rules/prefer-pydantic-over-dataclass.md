@@ -1,3 +1,7 @@
+---
+paths:
+  - "**/*.py"
+---
 # Prefer Pydantic BaseModel Over dataclass
 
 > *Last-validated*: 2026-05-15

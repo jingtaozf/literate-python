@@ -1,3 +1,7 @@
+---
+paths:
+  - "**/*.py"
+---
 # Package Root Policy
 
 > *Last-validated*: 2026-05-15

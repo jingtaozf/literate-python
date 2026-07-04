@@ -1,3 +1,7 @@
+---
+paths:
+  - "**/*.py"
+---
 # No Bare `except Exception`
 
 > *Last-validated*: 2026-05-15

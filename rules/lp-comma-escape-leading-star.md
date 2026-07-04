@@ -1,3 +1,7 @@
+---
+paths:
+  - "**/*.org"
+---
 # Comma-Escape Leading `*` Inside `#+begin_src` Blocks
 
 > *Last-validated*: 2026-05-15

@@ -1,3 +1,8 @@
+---
+paths:
+  - "**/*.py"
+  - "**/*.el"
+---
 # OOP Design — Smalltalk-Flavoured Protocols
 
 > *Last-validated*: 2026-05-20

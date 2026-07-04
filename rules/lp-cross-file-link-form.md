@@ -1,3 +1,7 @@
+---
+paths:
+  - "**/*.org"
+---
 # Cross-file references in Literate `.org` Files use org links, not bare text
 
 > *Last-validated*: 2026-05-19

@@ -1,3 +1,7 @@
+---
+paths:
+  - "**/*.org"
+---
 # Use Noweb References to Split Big Classes / Functions
 
 > *Last-validated*: 2026-05-15

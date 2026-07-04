@@ -1,3 +1,7 @@
+---
+paths:
+  - "**/*.py"
+---
 # Python Literate Programming — org as Single Source of Truth
 
 > *Last-validated*: 2026-05-20

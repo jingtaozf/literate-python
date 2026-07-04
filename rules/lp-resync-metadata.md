@@ -1,3 +1,7 @@
+---
+paths:
+  - "**/*.org"
+---
 # LP Resync Metadata Schema
 
 > *Last-validated*: 2026-05-23

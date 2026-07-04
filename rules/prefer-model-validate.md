@@ -1,3 +1,7 @@
+---
+paths:
+  - "**/*.py"
+---
 # Prefer `model_validate` Over Manual Field Mapping
 
 > *Last-validated*: 2026-05-15

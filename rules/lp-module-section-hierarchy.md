@@ -1,3 +1,7 @@
+---
+paths:
+  - "**/*.org"
+---
 # Module Section Hierarchy in Literate `.org` Files
 
 > *Last-validated*: 2026-05-28

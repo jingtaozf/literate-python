@@ -1,3 +1,7 @@
+---
+paths:
+  - "**/*.org"
+---
 # Org-Mode Docs-First — concrete section shape
 
 > *Last-validated*: 2026-05-20
